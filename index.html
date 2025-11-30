@@ -100,7 +100,7 @@
                 <a href="#featured-products" class="text-sm font-medium nav-link hover:text-silverstone-gold transition duration-150 tracking-wider">SHOP ALL</a>
                 <a href="#collections" class="text-sm font-medium nav-link hover:text-silverstone-gold transition duration-150 tracking-wider">COLLECTIONS</a>
                 <a href="#craftsmanship" class="text-sm font-medium nav-link hover:text-silverstone-gold transition duration-150 tracking-wider">CRAFT</a>
-                <a href="#atelier" class="text-sm font-medium nav-link hover:text-silverstone-gold transition duration-150 tracking-wider">ATELIER</a>
+                <a href="#contact" class="text-sm font-medium nav-link hover:text-silverstone-gold transition duration-150 tracking-wider">CONTACT</a>
             </div>
 
             <!-- Call to Action Button & Cart Icon --><div class="flex items-center space-x-4">
@@ -124,7 +124,7 @@
             <a href="#featured-products" class="py-2 text-[#1f2937] hover:text-silverstone-gold transition duration-150 font-medium">SHOP ALL</a>
             <a href="#collections" class="py-2 text-[#1f2937] hover:text-silverstone-gold transition duration-150 font-medium">COLLECTIONS</a>
             <a href="#craftsmanship" class="py-2 text-[#1f2937] hover:text-silverstone-gold transition duration-150 font-medium">CRAFT</a>
-            <a href="#atelier" class="py-2 text-[#1f2937] hover:text-silverstone-gold transition duration-150 font-medium">ATELIER</a>
+            <a href="#contact" class="py-2 text-[#1f2937] hover:text-silverstone-gold transition duration-150 font-medium">CONTACT</a>
             <button class="mt-4 px-4 py-2 rounded-full bg-silverstone-gold text-white font-semibold text-sm btn-primary">
                 Shop The Drop
             </button>
@@ -147,7 +147,7 @@
                             Shop All Items
                         </a>
                         <a href="#collections" class="px-10 py-3 rounded-full bg-transparent border-2 border-[#1f2937]/30 text-[#1f2937] font-bold text-lg hover:bg-gray-100 transition duration-300 uppercase tracking-wider">
-                            By Atelier
+                            By Brand
                         </a>
                     </div>
                 </div>
@@ -178,7 +178,7 @@
         <section id="collections" class="py-20 md:py-32 bg-[#ffffff]">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="text-center mb-16">
-                    <h2 class="text-4xl sm:text-5xl font-light text-[#1f2937] mb-3 uppercase tracking-widest">Curated Ateliers (Brands)</h2>
+                    <h2 class="text-4xl sm:text-5xl font-light text-[#1f2937] mb-3 uppercase tracking-widest">Curated Brands</h2>
                     <p class="text-lg text-gray-500">Select a major brand block to view only its dedicated collection.</p>
                 </div>
                 <!-- Dynamic collection sections will be inserted here by JavaScript -->
@@ -239,7 +239,7 @@
                         <h4 class="text-lg font-semibold text-[#1f2937] mb-4 uppercase">Collections</h4>
                         <ul class="space-y-2">
                             <li><a href="#featured-products" class="text-sm text-gray-500 hover:text-silverstone-gold transition">Shop All Items</a></li>
-                            <li><a href="#collections" class="text-sm text-gray-500 hover:text-silverstone-gold transition">All Ateliers</a></li>
+                            <li><a href="#collections" class="text-sm text-gray-500 hover:text-silverstone-gold transition">All Brands</a></li>
                             <li><a href="#" class="text-sm text-gray-500 hover:text-silverstone-gold transition">Outerwear</a></li>
                             <li><a href="#" class="text-sm text-gray-500 hover:text-silverstone-gold transition">Accessories</a></li>
                         </ul>
@@ -256,7 +256,7 @@
                     </div>
                     
                     <!-- Contact --><div>
-                        <h4 class="text-lg font-semibold text-[#1f2937] mb-4 uppercase">Atelier</h4>
+                        <h4 class="text-lg font-semibold text-[#1f2937] mb-4 uppercase">Contact</h4>
                         <p class="text-sm text-gray-500">101 Design Row, Fashion District</p>
                         <p class="text-sm text-gray-500 mt-2">Email: <a href="mailto:info@silverstone.com" class="hover:text-silverstone-gold">info@silverstone.com</a></p>
                     </div>
@@ -264,7 +264,7 @@
                 </div>
                 
                 <div class="text-center text-sm text-gray-400">
-                    &copy; <span id="current-year"></span> Silverstone Atelier. All rights reserved.
+                    &copy; <span id="current-year"></span> Silverstone. All rights reserved.
                 </div>
             </div>
         </footer>
@@ -437,7 +437,8 @@
                 if (products && products.length > 0) {
                     const cleanBrandId = brand.toLowerCase().replace(/ /g, '-');
                     const headerColorClass = brandColors[brand] || 'bg-gray-200 text-[#1f2937]';
-                    const brandTitle = brand.toUpperCase() + (brand.includes('Collection') ? '' : ' ATELIER');
+                    // REMOVED ' ATELIER' suffix
+                    const brandTitle = brand.toUpperCase() + (brand.includes('Collection') ? '' : ''); 
                     const subtitle = brand === 'Featured Collection' 
                         ? 'The centerpiece of the latest drop.' 
                         : 'Explore the definitive, curated selection.';

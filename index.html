@@ -330,8 +330,8 @@
                     { name: 'Grey Camo', code: '#4b5563', imageUrl: 'https://img.sanishtech.com/u/95e14f2257be686fd0acce81e915f77e.jpg' },
                     // Blue
                     { name: 'Blue', code: '#1e40af', imageUrl: 'https://img.sanishtech.com/u/993f9927f4db32f655cc07183ec7f414.jpg' },
-                    // Pink
-                    { name: 'Pink', code: '#ec4899', imageUrl: 'https://img.sanishtech.com/u/69deea1dbb61c2a791701bcded12.jpg' }
+                    // Pink - **UPDATED IMAGE URL HERE**
+                    { name: 'Pink', code: '#ec4899', imageUrl: 'https://img.sanishtech.com/u/69deea1dbb61c2a7930757d01bcded12.jpg' } 
                 ]
             },
             {
@@ -398,7 +398,7 @@
                 description: 'Hand-crafted sterling silver bracelet featuring iconic cross links. Heavyweight and premium feel.',
                 price: 2500,
                 brand: 'Chrome Hearts',
-                imageUrl: 'https://img.sanishtech.com/u/f7d3910ebf14b62f44105efcc7b9f36f.jpg', 
+                imageUrl: 'https://img.sanishtech.com/u/3eef2298938a1192c940248fa3f1a043.jpg', // THIS HAS BEEN UPDATED
                 tag: 'New Arrival',
                 tagClass: 'bg-[#1f2937] left-4',
                 sizes: ['Small', 'Medium', 'Large'] // Added sizes
@@ -431,320 +431,338 @@
                 <div class="flex items-center space-x-2">
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
                     <span>${message}</span>
-                </div>
-            `;
-
+                </div>`;
+            
+            // Append and animate the notification
             container.appendChild(notification);
             
-            // Animate in
+            // Use setTimeout to ensure the element is painted before transition starts
             setTimeout(() => {
                 notification.classList.remove('opacity-0', 'translate-x-10');
                 notification.classList.add('opacity-100', 'translate-x-0');
             }, 10);
 
-            // Animate out and remove after 3 seconds
+            // Auto-hide the notification after 4 seconds
             setTimeout(() => {
                 notification.classList.remove('opacity-100', 'translate-x-0');
                 notification.classList.add('opacity-0', 'translate-x-10');
-                // Remove element completely after transition
-                notification.addEventListener('transitionend', () => notification.remove());
-            }, 3000);
+                
+                // Remove the element after the transition is complete (0.3s)
+                setTimeout(() => {
+                    container.removeChild(notification);
+                }, 300);
+            }, 4000);
         }
 
-        // Function to create a product card HTML element
-        function createProductCard(product) {
-            // Placeholder/Fallback image logic
-            const fallbackImage = `https://placehold.co/400x600/f0f0f0/a38c5b?text=${encodeURIComponent(product.name.replace(/\s/g, '+'))}`;
+        // Renders a single product card
+        function renderProductCard(product) {
+            const tagHtml = product.tag ? 
+                `<span class="absolute top-4 ${product.tagClass || 'bg-gray-800 right-4'} text-white text-xs font-semibold px-3 py-1 rounded-full shadow-md z-10">${product.tag}</span>` : 
+                '';
 
             return `
-                <div class="product-card card-bg rounded-xl overflow-hidden shadow-md cursor-pointer relative" onclick="openProductModal('${product.id}')">
-                    <!-- Product Tag -->
-                    ${product.tag ? `<span class="absolute top-4 ${product.tagClass} text-white text-xs font-semibold px-3 py-1 rounded-full shadow-lg z-10">${product.tag}</span>` : ''}
-
-                    <div class="h-64 sm:h-80 overflow-hidden">
+                <div class="product-card card-bg rounded-xl overflow-hidden cursor-pointer" onclick="openProductModal('${product.id}')">
+                    <div class="relative h-64 overflow-hidden">
+                        ${tagHtml}
                         <img src="${product.imageUrl}" 
                              alt="${product.name}" 
-                             class="w-full h-full object-cover transition duration-500 ease-in-out hover:scale-105"
-                             onerror="this.onerror=null; this.src='${fallbackImage}';">
+                             class="w-full h-full object-cover transition duration-500 ease-in-out hover:scale-[1.03]"
+                             onerror="this.onerror=null; this.src='https://placehold.co/400x400/f0f0f0/a38c5b?text=${product.name.replace(/\s/g, '+')}';">
                     </div>
-                    <div class="p-4 md:p-6 text-center">
-                        <p class="text-sm text-gray-500 mb-1 uppercase tracking-widest">${product.brand}</p>
-                        <h3 class="text-xl font-medium text-[#1f2937] mb-2 truncate">${product.name}</h3>
-                        <p class="text-2xl font-bold text-silverstone-gold">$${product.price.toFixed(2)}</p>
+                    <div class="p-6">
+                        <p class="text-xs text-gray-500 mb-1 uppercase">${product.brand}</p>
+                        <h3 class="text-xl font-semibold mb-2">${product.name}</h3>
+                        <p class="text-2xl font-bold text-silverstone-gold">$${product.price.toLocaleString()}</p>
                     </div>
                 </div>
             `;
         }
 
-        // Function to render products into the main grid
-        function renderProducts(productsToRender) {
+        // Renders the main product grid based on the active filter
+        function renderFeaturedProducts(filterBrand = null) {
             const container = document.getElementById('featured-products-container');
-            container.innerHTML = productsToRender.map(createProductCard).join('');
+            container.innerHTML = ''; // Clear existing content
+
+            const filteredProducts = filterBrand 
+                ? productData.filter(p => p.brand === filterBrand)
+                : productData;
+
+            if (filteredProducts.length === 0) {
+                container.innerHTML = `<p class="col-span-4 text-center text-xl text-gray-500 py-10">No products found in the ${filterBrand} collection.</p>`;
+                return;
+            }
+
+            filteredProducts.forEach(product => {
+                container.innerHTML += renderProductCard(product);
+            });
         }
 
-        // Function to render the Brand Collection blocks
+        // Renders the brand collection blocks
         function renderCollections() {
             const container = document.getElementById('product-collections-container');
-            // Get unique brands
-            const uniqueBrands = [...new Set(productData.map(p => p.brand))];
-            
-            container.innerHTML = uniqueBrands.map(brand => {
-                const brandProducts = productData.filter(p => p.brand === brand);
-                // Use the brand color map
-                const colorClass = brandColors[brand] || 'bg-gray-200 text-[#1f2937]';
-                const collectionId = `collection-${brand.replace(/\s/g, '-')}`;
+            container.innerHTML = ''; // Clear loading text
 
-                return `
-                    <div class="brand-collection-block">
-                        <div id="${collectionId}-header" 
-                            class="brand-header-card ${colorClass} p-6 sm:p-8 rounded-xl flex justify-between items-center transition duration-300"
-                            onclick="toggleCollectionFilter('${brand}', '${collectionId}-grid')">
-                            <h3 class="text-3xl font-bold tracking-tight">${brand} Collection</h3>
-                            <span class="text-2xl font-thin transition-transform duration-300 transform" id="${collectionId}-icon">
-                                &#9660; <!-- Down arrow -->
-                            </span>
+            // Get unique brands
+            const brands = [...new Set(productData.map(p => p.brand))];
+
+            // Render each brand header block
+            brands.forEach(brand => {
+                const totalProducts = productData.filter(p => p.brand === brand).length;
+                const brandClass = brandColors[brand] || 'bg-gray-800 text-white';
+                const isActive = activeBrandFilter === brand ? 'active' : '';
+
+                const brandHeaderHtml = `
+                    <div class="w-full brand-header-card ${brandClass} rounded-xl overflow-hidden shadow-lg p-6 flex justify-between items-center" data-brand="${brand}">
+                        <div>
+                            <h3 class="text-3xl sm:text-4xl font-extrabold uppercase tracking-wider">${brand}</h3>
+                            <p class="text-sm opacity-80 mt-1">${totalProducts} Available Items</p>
                         </div>
-                        <div id="${collectionId}-grid" class="product-grid-container grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 px-0">
-                            ${brandProducts.map(createProductCard).join('')}
+                        <span class="text-3xl transform transition-transform duration-500 ${isActive ? 'rotate-180' : 'rotate-0'}">
+                            &darr;
+                        </span>
+                    </div>
+                    <div class="product-grid-container ${isActive}">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                            ${productData.filter(p => p.brand === brand).map(renderProductCard).join('')}
+                        </div>
+                        <div class="text-center mt-8">
+                            <button class="px-8 py-3 rounded-full border-2 border-[#1f2937]/30 text-[#1f2937] font-bold text-sm hover:bg-gray-100 transition duration-300 uppercase tracking-wider" onclick="renderFeaturedProducts(null); document.getElementById('collections').scrollIntoView({ behavior: 'smooth' });">
+                                View All Items
+                            </button>
                         </div>
                     </div>
                 `;
-            }).join('');
+                container.innerHTML += brandHeaderHtml;
+            });
             
-            // Re-select and hide all collection grids initially after rendering
-            document.querySelectorAll('.product-grid-container').forEach(grid => {
-                grid.classList.remove('active');
+            // Add click listeners to toggle collection visibility
+            document.querySelectorAll('.brand-header-card').forEach(header => {
+                header.addEventListener('click', function() {
+                    const brand = this.getAttribute('data-brand');
+                    
+                    if (activeBrandFilter === brand) {
+                        activeBrandFilter = null;
+                    } else {
+                        activeBrandFilter = brand;
+                    }
+                    
+                    // Re-render collections to apply the new active state
+                    renderCollections();
+
+                    // Scroll to the active collection to show products
+                    if (activeBrandFilter) {
+                        // Use a slight delay to allow the CSS transition to start before scrolling
+                        setTimeout(() => {
+                            this.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }, 50);
+                    }
+                });
             });
         }
-        
-        // Function to handle collection filtering/toggling
-        function toggleCollectionFilter(brand, gridId) {
-            const grid = document.getElementById(gridId);
-            const icon = document.getElementById(gridId.replace('-grid', '-header') + '-icon');
+
+        // Renders the content of the product detail modal
+        function renderModalContent(product) {
+            const hasColors = product.colors && product.colors.length > 0;
+            const hasSizes = product.sizes && product.sizes.length > 0;
             
-            // Close all other grids first
-            document.querySelectorAll('.product-grid-container').forEach(otherGrid => {
-                if (otherGrid.id !== gridId) {
-                    otherGrid.classList.remove('active');
-                    const otherIcon = document.getElementById(otherGrid.id.replace('-grid', '-header') + '-icon');
-                    if(otherIcon) otherIcon.innerHTML = '&#9660;'; // Reset other icons
-                }
-            });
-
-            // Toggle the clicked grid
-            const isActive = grid.classList.toggle('active');
-
-            // Update icon
-            if (icon) {
-                icon.innerHTML = isActive ? '&#9650;' : '&#9660;'; // Up or Down arrow
-            }
-        }
-
-        // Function to generate the modal content
-        function openProductModal(productId) {
-            const product = productData.find(p => p.id === productId);
-            if (!product) return showNotification('Product not found.', 'error');
-
-            const modal = document.getElementById('product-modal');
-            const modalBody = document.getElementById('modal-body');
-            const isMultiColor = product.colors && product.colors.length > 0;
-            const defaultImage = isMultiColor ? product.colors[0].imageUrl : product.imageUrl;
-            
-            // Set current image for state management
-            let currentImageUrl = product.imageUrl;
-            if (isMultiColor) {
-                // Find the image URL that matches the product's default card image for initial load
-                const initialColorMatch = product.colors.find(c => c.imageUrl === product.imageUrl);
-                currentImageUrl = initialColorMatch ? initialColorMatch.imageUrl : defaultImage;
-            }
-
-            const fallbackImage = `https://placehold.co/600x900/f0f0f0/a38c5b?text=${encodeURIComponent(product.name.replace(/\s/g, '+'))}`;
-
-            // Determine if the product has sizes
-            const hasSizes = product.sizes && product.sizes.length > 0 && product.sizes[0] !== 'One Size';
-
-            modalBody.innerHTML = `
-                <div class="md:flex md:space-x-10 p-4 md:p-0">
-                    <!-- Image Column -->
-                    <div class="md:w-1/2 mb-6 md:mb-0 relative">
-                        <img id="modal-product-image" 
-                             src="${currentImageUrl}" 
-                             alt="${product.name}" 
-                             class="w-full h-auto rounded-lg shadow-lg"
-                             onerror="this.onerror=null; this.src='${fallbackImage}';">
-                        ${product.tag ? `<span class="absolute top-4 left-4 ${product.tagClass} text-white text-sm font-semibold px-3 py-1 rounded-full shadow-lg">${product.tag}</span>` : ''}
+            const colorOptionsHtml = hasColors ? `
+                <div class="mt-6">
+                    <p class="font-semibold text-gray-700 mb-3">Color: <span id="selected-color-name" class="font-normal text-[#1f2937]">${product.colors[0].name}</span></p>
+                    <div class="flex space-x-3" id="color-selector">
+                        ${product.colors.map((color, index) => `
+                            <div 
+                                class="w-8 h-8 rounded-full border border-gray-300 cursor-pointer transition transform hover:scale-110 ${index === 0 ? 'color-swatch-selected' : ''}"
+                                style="background-color: ${color.code};"
+                                data-color-name="${color.name}"
+                                data-image-url="${color.imageUrl}"
+                                onclick="selectProductVariant(this, 'color', '${product.id}', ${index})"
+                                >
+                            </div>
+                        `).join('')}
                     </div>
+                </div>
+            ` : '';
 
-                    <!-- Details Column -->
-                    <div class="md:w-1/2 flex flex-col justify-between">
+            const sizeOptionsHtml = hasSizes ? `
+                <div class="mt-8">
+                    <p class="font-semibold text-gray-700 mb-3">Size:</p>
+                    <div class="flex flex-wrap gap-3" id="size-selector">
+                        ${product.sizes.map((size, index) => `
+                            <input type="radio" id="size-${size}" name="size-select" value="${size}" class="hidden size-radio" ${index === 0 ? 'checked' : ''}>
+                            <label for="size-${size}" class="size-label border border-gray-300 rounded-full px-5 py-2 text-sm font-medium cursor-pointer hover:border-[#1f2937] transition duration-200">
+                                ${size}
+                            </label>
+                        `).join('')}
+                    </div>
+                </div>
+            ` : '';
+
+            // Default image URL for the modal (initial image, possibly updated by color selection)
+            const initialImageUrl = hasColors ? product.colors[0].imageUrl : product.imageUrl;
+
+            const contentHtml = `
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                    <!-- Image Gallery (1/2) -->
+                    <div class="flex flex-col space-y-4">
+                        <div class="relative rounded-xl overflow-hidden shadow-lg border border-gray-100">
+                            <img id="modal-product-image" src="${initialImageUrl}" alt="${product.name}" 
+                                 class="w-full h-full object-cover transition duration-300 ease-in-out"
+                                 onerror="this.onerror=null; this.src='https://placehold.co/600x600/f0f0f0/a38c5b?text=${product.name.replace(/\s/g, '+')}';">
+                        </div>
+                        <div class="flex space-x-2 overflow-x-auto pb-2">
+                             <!-- Placeholder for additional small gallery images if needed -->
+                            <img src="${product.imageUrl}" alt="Thumbnail 1" class="w-20 h-20 rounded-lg object-cover border border-gray-200 cursor-pointer opacity-70 hover:opacity-100 transition duration-200" onclick="document.getElementById('modal-product-image').src = this.src;">
+                            <img src="https://placehold.co/80x80/f0f0f0/1f2937?text=Detail+2" alt="Thumbnail 2" class="w-20 h-20 rounded-lg object-cover border border-gray-200 cursor-pointer opacity-70 hover:opacity-100 transition duration-200" onclick="document.getElementById('modal-product-image').src = this.src;">
+                        </div>
+                    </div>
+                    
+                    <!-- Details (2/2) -->
+                    <div class="flex flex-col justify-between">
                         <div>
-                            <p class="text-lg text-gray-500 mb-1 uppercase tracking-widest">${product.brand}</p>
-                            <h2 class="text-4xl font-extrabold text-[#1f2937] mb-4">${product.name}</h2>
-                            <p class="text-3xl font-bold text-silverstone-gold mb-6">$${product.price.toFixed(2)}</p>
+                            <p class="text-sm text-gray-500 mb-1 uppercase">${product.brand}</p>
+                            <h2 class="text-4xl font-extrabold mb-2">${product.name}</h2>
+                            <p class="text-3xl font-bold text-silverstone-gold mb-6">$${product.price.toLocaleString()}</p>
+
+                            <p class="text-gray-600 leading-relaxed">${product.description}</p>
                             
-                            <p class="text-gray-600 mb-8">${product.description}</p>
-
-                            <!-- Color Selector -->
-                            ${isMultiColor ? `
-                                <div class="mb-6">
-                                    <h4 class="text-md font-semibold text-[#1f2937] mb-3 uppercase tracking-wider">Color: <span id="selected-color-name" class="font-normal text-gray-600">${product.colors[0].name}</span></h4>
-                                    <div class="flex space-x-3">
-                                        ${product.colors.map((color, index) => `
-                                            <button 
-                                                id="color-swatch-${index}"
-                                                class="w-8 h-8 rounded-full border-2 border-gray-300 focus:outline-none focus:ring-4 focus:ring-offset-2 focus:ring-silverstone-gold transition duration-150 ${color.imageUrl === currentImageUrl ? 'color-swatch-selected' : ''}"
-                                                style="background-color: ${color.code};"
-                                                title="${color.name}"
-                                                onclick="updateModalColor('${product.id}', '${color.name}', '${color.imageUrl}', ${index})">
-                                            </button>
-                                        `).join('')}
-                                    </div>
-                                </div>
-                            ` : ''}
-
-                            <!-- Size Selector -->
-                            ${hasSizes ? `
-                                <div class="mb-8">
-                                    <h4 class="text-md font-semibold text-[#1f2937] mb-3 uppercase tracking-wider">Size</h4>
-                                    <div class="flex flex-wrap gap-3">
-                                        ${product.sizes.map((size, index) => `
-                                            <input type="radio" id="size-${productId}-${size}" name="size-selector" value="${size}" class="hidden size-radio" ${index === 0 ? 'checked' : ''}>
-                                            <label for="size-${productId}-${size}" class="size-label px-4 py-2 border border-gray-300 rounded-full text-sm font-medium cursor-pointer hover:border-silverstone-gold transition duration-150">
-                                                ${size}
-                                            </label>
-                                        `).join('')}
-                                    </div>
-                                </div>
-                            ` : `
-                                <div class="mb-8">
-                                    <h4 class="text-md font-semibold text-[#1f2937] mb-3 uppercase tracking-wider">Size: <span class="font-normal text-gray-600">${product.sizes[0]}</span></h4>
-                                </div>
-                            `}
+                            ${colorOptionsHtml}
+                            ${sizeOptionsHtml}
+                            
+                            <div class="mt-8 pt-4 border-t border-gray-200">
+                                <p class="text-sm text-gray-500">Estimated Delivery: 5-7 business days.</p>
+                            </div>
                         </div>
 
-                        <!-- Action Buttons -->
-                        <div class="flex flex-col space-y-3 mt-4">
-                            <button class="w-full px-8 py-3 rounded-full bg-silverstone-gold text-white font-bold text-lg btn-primary shadow-lg uppercase tracking-wider"
-                                onclick="addToCart('${product.id}', '${product.name}')">
+                        <div class="mt-8 flex space-x-4">
+                            <button id="add-to-cart-btn" class="flex-1 py-3 rounded-full bg-silverstone-gold text-white font-bold text-lg btn-primary uppercase tracking-wider" onclick="addToCart('${product.id}')">
                                 Add to Cart
                             </button>
-                            <button class="w-full px-8 py-3 rounded-full bg-transparent border-2 border-[#1f2937]/30 text-[#1f2937] font-bold text-lg hover:bg-gray-100 transition duration-300 uppercase tracking-wider"
-                                onclick="closeModal()">
-                                Continue Shopping
+                            <button class="w-16 h-16 rounded-full border-2 border-gray-300 text-[#1f2937] flex items-center justify-center btn-cart hover:border-[#1f2937] transition duration-200">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
                             </button>
                         </div>
                     </div>
                 </div>
-
+                
                 <!-- Close Button -->
-                <button class="absolute top-4 right-4 text-gray-400 hover:text-[#1f2937] transition duration-150" onclick="closeModal()">
+                <button class="absolute top-4 right-4 text-gray-600 hover:text-[#1f2937] p-2 rounded-full bg-white/70 backdrop-blur-sm" onclick="closeProductModal()">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             `;
-
-            // Display the modal with animation
-            modal.classList.remove('hidden');
-            document.body.style.overflow = 'hidden'; // Prevent background scrolling
-            
-            // Wait for a slight delay before animating opacity/transform
-            setTimeout(() => {
-                modal.classList.add('opacity-100');
-                document.getElementById('modal-content-wrapper').classList.remove('translate-y-4');
-                isModalOpen = true;
-            }, 10);
+            document.getElementById('modal-body').innerHTML = contentHtml;
         }
-
-        // Function to handle color/image changes in the modal
-        function updateModalColor(productId, colorName, imageUrl, selectedIndex) {
+        
+        // Handles color/image selection in the modal (simulated variant selection)
+        function selectProductVariant(element, type, productId, index) {
             const product = productData.find(p => p.id === productId);
             if (!product) return;
 
-            // 1. Update the main image source
-            const imgElement = document.getElementById('modal-product-image');
-            if (imgElement) {
-                imgElement.src = imageUrl;
-            }
+            if (type === 'color' && product.colors) {
+                // Update image based on selected color
+                const imageUrl = element.getAttribute('data-image-url');
+                const colorName = element.getAttribute('data-color-name');
+                document.getElementById('modal-product-image').src = imageUrl;
+                document.getElementById('selected-color-name').textContent = colorName;
 
-            // 2. Update the color name text
-            const colorNameElement = document.getElementById('selected-color-name');
-            if (colorNameElement) {
-                colorNameElement.textContent = colorName;
+                // Update visual selection (swatch)
+                document.querySelectorAll('#color-selector > div').forEach(swatch => {
+                    swatch.classList.remove('color-swatch-selected');
+                });
+                element.classList.add('color-swatch-selected');
             }
-
-            // 3. Update the selected swatch indicator
-            product.colors.forEach((_, index) => {
-                const swatch = document.getElementById(`color-swatch-${index}`);
-                if (swatch) {
-                    if (index === selectedIndex) {
-                        swatch.classList.add('color-swatch-selected');
-                    } else {
-                        swatch.classList.remove('color-swatch-selected');
-                    }
-                }
-            });
+            // For size selection, no image update is needed in this simple setup,
+            // the CSS handling of the radio buttons manages the visual state.
         }
 
+        // Opens the product detail modal
+        function openProductModal(productId) {
+            const product = productData.find(p => p.id === productId);
+            if (!product) {
+                showNotification(`Product with ID ${productId} not found.`, 'error');
+                return;
+            }
 
-        // Function to close the modal
-        function closeModal() {
+            renderModalContent(product);
+
             const modal = document.getElementById('product-modal');
-            const modalContentWrapper = document.getElementById('modal-content-wrapper');
+            const contentWrapper = document.getElementById('modal-content-wrapper');
+            
+            modal.classList.remove('hidden');
+            // Timeout to allow the browser to register the visibility change before starting transition
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                contentWrapper.classList.remove('translate-y-4');
+            }, 10);
+            
+            isModalOpen = true;
+        }
 
-            modal.classList.remove('opacity-100');
-            modalContentWrapper.classList.add('translate-y-4');
-            document.body.style.overflow = ''; // Restore background scrolling
+        // Closes the product detail modal
+        function closeProductModal() {
+            const modal = document.getElementById('product-modal');
+            const contentWrapper = document.getElementById('modal-content-wrapper');
 
-            // Hide the modal completely after the transition ends
+            modal.classList.add('opacity-0');
+            contentWrapper.classList.add('translate-y-4');
+
+            // Timeout to allow the transition to complete before hiding
             setTimeout(() => {
                 modal.classList.add('hidden');
-                document.getElementById('modal-body').innerHTML = ''; // Clear content
-                isModalOpen = false;
-            }, 500); // Matches transition duration
+            }, 300);
+            
+            isModalOpen = false;
         }
 
-        // Simple Add to Cart function (just shows notification)
-        function addToCart(productId, productName) {
-            // In a real app, this would update cart state (localStorage or Firestore)
-            closeModal();
-            showNotification(`${productName} added to cart!`, 'success');
+        // Simulates adding an item to the cart
+        function addToCart(productId) {
+            const product = productData.find(p => p.id === productId);
+            // In a real app, you would collect size/color/quantity here.
+            // For this simulation, we just confirm the product.
+            
+            if (product) {
+                showNotification(`${product.name} added to cart!`, 'success');
+            }
+            
+            // Close the modal after adding to cart
+            closeProductModal();
         }
 
-        // Initialization function
+
+        // --- Initialization and Event Listeners ---
+
         function init() {
-            // Set current year in the footer
+            // Set current year in footer
             document.getElementById('current-year').textContent = new Date().getFullYear();
 
-            // Render all products initially to the Featured Products section
-            renderProducts(productData);
-
-            // Render brand collection blocks
+            // Render initial product grids
+            renderFeaturedProducts(null);
             renderCollections();
-
-            // Mobile menu toggle logic
+            
+            // Mobile Menu Toggle
             const mobileMenuButton = document.getElementById('mobile-menu-button');
             const mobileMenu = document.getElementById('mobile-menu');
-
+            
             mobileMenuButton.addEventListener('click', () => {
                 mobileMenu.classList.toggle('hidden');
             });
 
-            // Close modal on escape key
-            document.addEventListener('keydown', (event) => {
-                if (event.key === 'Escape' && isModalOpen) {
-                    closeModal();
+            // Modal Close on backdrop click (if modal is open)
+            document.getElementById('product-modal').addEventListener('click', function(e) {
+                if (e.target.id === 'product-modal') {
+                    closeProductModal();
                 }
             });
 
-            // Close modal on clicking the overlay
-            document.getElementById('product-modal').addEventListener('click', (event) => {
-                if (event.target.id === 'product-modal') {
-                    closeModal();
+            // Close modal on Escape key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && isModalOpen) {
+                    closeProductModal();
                 }
             });
         }
 
-        // Run initialization when the DOM is fully loaded
-        document.addEventListener('DOMContentLoaded', init);
+        // Run initialization function when the window loads
+        window.onload = init;
     </script>
 </body>
 </html>

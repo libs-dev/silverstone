@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SILVERSTONE | OFFICIAL</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        .font-cinzel { font-family: 'Cinzel', serif; }
+        body {
+            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+            background-color: #f5f5f5; 
+            color: #111111;
+            overflow-x: hidden;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+        .hover-stark:hover {
+            color: #000000 !important;
+            background-color: #eeeeee;
+            transition: all 0.2s ease-in-out;
+        }
+        .clean-separator { border-bottom: 1px solid #e0e0e0; }
+        .cross-divider {
+            content: '';
+            display: block;
+            margin: 6rem auto;
+            width: 1px;
+            height: 3rem;
+            background-color: #cccccc;
+        }
+        #mobile-menu { transition: transform 0.3s ease-out; }
+    </style>
+</head>
+<body class="bg-gray-50 text-black min-h-screen">
+
+    <!-- Firebase Imports and Initialization -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, query, where, getDocs, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global variables provided by the environment
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        let app, db, auth, currentUserId;
+        window.allProducts = []; // Global array to hold products fetched from Firestore
+
+        // Initial Product Data for Bootstrapping the database
+        const BOOTSTRAP_PRODUCTS = [
+            { id: 1, name: "Graveyard Skull Ring", price: "$2,800 USD", category: "jewelry", isFeatured: true, img: "https://image.pollinations.ai/prompt/detailed%20silver%20skull%20ring%20on%20a%20white%20minimalist%20background%2C%20high-contrast%20product%20shot%2C%20luxury%20jewelry", description: "Meticulously hand-forged skull ring from 925 sterling silver." },
+            { id: 2, name: "The Sentinel Leather Vest", price: "$9,500 USD", category: "apparel", isFeatured: true, img: "https://image.pollinations.ai/prompt/luxury%20black%20leather%20vest%20with%20silver%20hardware%20on%20a%20white%20minimalist%20background%2C%20high-end%20apparel%20photography", description: "Premium black leather vest with custom silver hardware, designed for endurance." },
+            { id: 3, name: "Heavy Link Chain (24\")", price: "$5,200 USD", category: "jewelry", isFeatured: true, img: "https://image.pollinations.ai/prompt/heavy%20silver%20link%20chain%20necklace%20on%20a%20white%20minimalist%20background%2C%20luxury%20jewelry%20photography%2C%20clean%20shot", description: "Heavy gauge 24-inch link chain, a statement piece of pure sterling silver." },
+            { id: 4, name: "Aged Cross Denim", price: "$1,800 USD", category: "apparel", isFeatured: true, img: "https://image.pollinations.ai/prompt/dark%20wash%20denim%20jeans%20with%20subtle%20silver%20cross%20details%20on%20a%20white%20minimalist%20background%2C%20high-end%20clothing", description: "Dark wash denim jeans featuring subtle hand-stitched silver cross accents." },
+            { id: 5, name: "Black Heart Pendant", price: "$1,500 USD", category: "jewelry", isFeatured: false, img: "https://image.pollinations.ai/prompt/black%20onyx%20heart%20pendant%20silver%20jewelry%20on%20minimalist%20background", description: "Onyx heart pendant set in a delicate silver frame." },
+            { id: 6, name: "The Serpent Ring", price: "$3,100 USD", category: "jewelry", isFeatured: false, img: "https://image.pollinations.ai/prompt/silver%20serpent%20ring%20minimalist%20background", description: "Intricately coiled serpent ring, symbolizing eternity and transformation." },
+            { id: 7, name: "Custom T-Shirt (Black)", price: "$450 USD", category: "apparel", isFeatured: false, img: "https://image.pollinations.ai/prompt/premium%20black%20t-shirt%20with%20gothic%20silver%20print%20studio%20shot", description: "Heavyweight black cotton t-shirt with a limited edition gothic silver print." },
+            { id: 8, name: "Leather Moto Jacket", price: "$12,000 USD", category: "apparel", isFeatured: false, img: "https://image.pollinations.ai/prompt/high-end%20fitted%20leather%20moto%20jacket%20white%20studio%20background", description: "A fitted leather moto jacket with asymmetrical zips and reinforced stitching." },
+        ];
+
+        // Public collection path for products
+        const PRODUCTS_COLLECTION_PATH = `/artifacts/${appId}/public/data/products`;
+
+        async function initializeFirebase() {
+            if (!firebaseConfig) {
+                console.error("Firebase configuration is missing.");
+                return;
+            }
+            
+            // setLogLevel('Debug');
+            app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            auth = getAuth(app);
+
+            // Authentication
+            try {
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (error) {
+                console.error("Firebase Auth failed:", error);
+                await signInAnonymously(auth); // Fallback to anonymous sign-in
+            }
+            
+            currentUserId = auth.currentUser ? auth.currentUser.uid : 'anonymous';
+            document.getElementById('user-info').textContent = `User ID: ${currentUserId}`;
+
+            // Bootstrap Data if the collection is empty
+            await bootstrapProductsIfEmpty();
+
+            // Start listening for product updates
+            window.loadProductsFromFirestore();
+        }
+
+        async function bootstrapProductsIfEmpty() {
+            try {
+                const q = query(collection(db, PRODUCTS_COLLECTION_PATH));
+                const snapshot = await getDocs(q);
+                
+                if (snapshot.empty) {
+                    console.log("Products collection empty. Bootstrapping initial data...");
+                    for (const product of BOOTSTRAP_PRODUCTS) {
+                        // Use setDoc with a specific ID based on product name
+                        const docRef = doc(db, PRODUCTS_COLLECTION_PATH, product.name.replace(/\s/g, '_'));
+                        await setDoc(docRef, product);
+                    }
+                    console.log("Products bootstrapped successfully.");
+                } else {
+                    console.log("Products collection already contains data.");
+                }
+            } catch (error) {
+                console.error("Error bootstrapping products:", error);
+            }
+        }
+        
+        // Expose function globally to be called from DOMContentLoaded
+        window.loadProductsFromFirestore = function() {
+            if (!db) {
+                console.error("Firestore not initialized.");
+                return;
+            }
+
+            const q = query(collection(db, PRODUCTS_COLLECTION_PATH));
+
+            // Set up real-time listener
+            onSnapshot(q, (snapshot) => {
+                const newProducts = [];
+                snapshot.forEach((doc) => {
+                    // Add the Firestore Document ID to the product object
+                    newProducts.push({ id: doc.id, ...doc.data() });
+                });
+                
+                window.allProducts = newProducts;
+                
+                // Refresh the view to show the new data
+                const currentView = window.currentView || 'home';
+                window.changeView(currentView);
+            }, (error) => {
+                console.error("Error listening to products:", error);
+            });
+        };
+
+        initializeFirebase();
+    </script>
+
+    <!-- Header & Minimal Navigation -->
+    <header class="w-full py-6 px-6 md:px-12 clean-separator fixed top-0 bg-white z-20 shadow-sm">
+        <div class="max-w-8xl mx-auto flex justify-between items-center">
+            <!-- Logo / Brand Name: Clicking logo returns to home view -->
+            <a href="#" onclick="changeView('home', event)" class="text-xl md:text-3xl font-extrabold uppercase font-cinzel text-black whitespace-nowrap min-w-0">
+                SILVERSTONE
+            </a>
+
+            <!-- Navigation Links (Primary Desktop Links) -->
+            <nav class="hidden md:flex space-x-10 text-sm font-light uppercase tracking-widest">
+                <a href="#" onclick="changeView('jewelry', event)" class="text-gray-600 hover-stark p-2">Jewelry</a>
+                <a href="#" onclick="changeView('apparel', event)" class="text-gray-600 hover-stark p-2">Apparel</a>
+                <a href="#" onclick="showModal('The Foundry is where we cast our future. Check back soon.')" class="text-gray-600 hover-stark p-2">The Foundry</a>
+            </nav>
+
+            <!-- Utility Icons (Search/Cart) -->
+            <div class="flex items-center space-x-6 text-xl text-gray-700">
+                <button class="hover:text-black transition duration-200" onclick="showModal('Search feature is being forged. Try again later.')">
+                    &#9906;
+                </button>
+                <button class="hover:text-black transition duration-200" onclick="showModal('Your cart contains 0 relics. Explore our collections!')">
+                    &#128717;
+                </button>
+                <!-- Mobile Menu Button -->
+                <button class="md:hidden hover:text-black text-2xl" id="menu-toggle">
+                    &#9776;
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="fixed inset-0 bg-white z-30 transform translate-x-full md:hidden">
+        <div class="flex justify-between items-center p-6 clean-separator">
+            <div class="text-xl font-extrabold uppercase font-cinzel text-black">SILVERSTONE</div>
+            <button class="text-4xl text-black hover:text-gray-600" onclick="closeMenu()">&times;</button>
+        </div>
+        <nav class="flex flex-col space-y-8 p-10 text-xl font-cinzel uppercase tracking-widest">
+            <a href="#" class="text-black hover:text-gray-700" onclick="changeView('jewelry', event); closeMenu()">Jewelry</a>
+            <a href="#" class="text-black hover:text-gray-700" onclick="changeView('apparel', event); closeMenu()">Apparel</a>
+            <a href="#" class="text-black hover:text-gray-700" onclick="showModal('The Foundry is being forged.', event); closeMenu()">The Foundry</a>
+            <a href="#" class="text-black hover:text-gray-700" onclick="showModal('We welcome your inquiry.', event); closeMenu()">Client Care</a>
+        </nav>
+    </div>
+
+    <main class="w-full pt-20"> 
+        <!-- Hero Section / Collection Drop Banner (Only visible on home view) -->
+        <section id="hero-section" class="relative h-[85vh] flex items-end justify-start bg-gray-200 clean-separator">
+            <img src="https://image.pollinations.ai/prompt/silver%20jewelry%20on%20a%20minimalist%20luxury%20background%20with%20subtle%20shadows%2C%20white%20and%20grey%20tones%2C%20high-end%20product%20photography" alt="New collection banner"
+                 class="absolute inset-0 w-full h-full object-cover opacity-80">
+
+            <div class="relative z-10 p-8 md:p-12 w-full md:w-1/2 bg-white bg-opacity-80 backdrop-blur-sm border-t border-r border-gray-300">
+                <p class="text-xs uppercase tracking-widest text-gray-500 mb-2">New Drop // SS 25</p>
+                <h1 class="text-5xl md:text-7xl font-black uppercase mb-6 tracking-tight font-cinzel text-black break-words">
+                    The Obsidian Vault
+                </h1>
+                <p class="text-sm md:text-base font-light text-gray-600 mb-8 max-w-lg">
+                    Forged in Fire. Cast in Silver. Built to Endure. Explore the limited edition release of handcrafted relics and leather goods.
+                </p>
+                <a href="#artifacts" class="inline-block px-8 py-3 text-sm font-bold uppercase tracking-widest border border-black text-black hover:bg-black hover:text-white transition duration-300 scroll-smooth">
+                    Discover The Collection
+                </a>
+            </div>
+        </section>
+
+        <!-- Minimal Divider Line -->
+        <div class="cross-divider" id="cross-divider"></div>
+        
+        <!-- User Info / Status -->
+        <div id="user-info" class="text-center text-xs text-gray-400 mt-4">Initializing Firebase...</div>
+
+        <!-- Dynamic Products Grid -->
+        <section class="max-w-7xl mx-auto px-6 py-12 md:py-20" id="artifacts">
+            <h2 id="artifacts-title" class="text-2xl font-extrabold uppercase mb-16 text-center tracking-widest font-cinzel clean-separator pb-4 inline-block mx-auto text-black">
+                Loading Artifacts...
+            </h2>
+            <div id="artifacts-grid" class="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
+                <!-- Product cards will be inserted here by JavaScript -->
+                <div class="col-span-2 lg:col-span-4 text-center text-gray-600 italic py-10" id="loading-indicator">
+                    Fetching latest relics from the Vault...
+                </div>
+            </div>
+        </section>
+        
+        <!-- Full-Width Statement Banner (Only visible on home view) -->
+        <div class="w-full text-center py-24 mt-20 bg-gray-100 border-t border-b border-gray-300" id="quote-banner">
+             <p class="text-3xl md:text-5xl font-light italic tracking-tight text-gray-700 font-cinzel max-w-5xl mx-auto px-6">
+                "The only thing that matters is the quality of the relic."
+            </p>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="w-full py-12 md:py-20 px-6 bg-white clean-separator">
+        <div class="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-12 text-xs uppercase tracking-widest font-light">
+            <!-- Footer columns remain static for simplicity -->
+            <div>
+                <h3 class="font-bold mb-4 text-sm font-cinzel text-black">Services</h3>
+                <ul class="space-y-3 text-gray-600">
+                    <li><a href="#" class="hover:text-black transition duration-200" onclick="showModal('Redirecting to Client Care...')">Client Care</a></li>
+                    <li><a href="#" class="hover:text-black transition duration-200" onclick="showModal('Redirecting to Repair & Restoration...')">Repair & Restoration</a></li>
+                    <li><a href="#" class="hover:text-black transition duration-200" onclick="showModal('Redirecting to Shipping & Returns...')">Shipping & Returns</a></li>
+                </ul>
+            </div>
+            <div>
+                <h3 class="font-bold mb-4 text-sm font-cinzel text-black">Company</h3>
+                <ul class="space-y-3 text-gray-600">
+                    <li><a href="#" class="hover:text-black transition duration-200" onclick="showModal('About The Forge: Where our legend began.')">About The Forge</a></li>
+                    <li><a href="#" class="hover:text-black transition duration-200" onclick="showModal('Careers: Seekers of the highest craft are invited.')">Careers</a></li>
+                    <li><a href="#" class="hover:text-black transition duration-200" onclick="showModal('Lookbooks: Visual archive of our collections.')">Lookbooks</a></li>
+                </ul>
+            </div>
+            <div>
+                <h3 class="font-bold mb-4 text-sm font-cinzel text-black">Legal</h3>
+                <ul class="space-y-3 text-gray-600">
+                    <li><a href="#" class="hover:text-black transition duration-200" onclick="showModal('Legal terms being displayed...')">Terms of Use</a></li>
+                    <li><a href="#" class="hover:text-black transition duration-200" onclick="showModal('Privacy Policy being displayed...')">Privacy Policy</a></li>
+                    <li><a href="#" class="hover:text-black transition duration-200" onclick="showModal('Authenticity: Guaranteed 925 sterling silver.')">Authenticity</a></li>
+                </ul>
+            </div>
+            <div>
+                <h3 class="font-bold mb-4 text-sm font-cinzel text-black">Connect</h3>
+                <form id="newsletter-form">
+                    <input type="email" placeholder="EMAIL ADDRESS" required id="newsletter-email"
+                           class="w-full p-3 mb-4 bg-white border border-gray-400 text-black placeholder-gray-500 focus:border-black focus:outline-none text-xs tracking-wider uppercase">
+                    <button type="submit" class="w-full py-3 border border-black bg-white text-black hover:bg-black hover:text-white transition duration-300 text-xs tracking-widest">
+                        Subscribe to the Vault
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="text-center mt-16 text-sm text-gray-500 font-light uppercase">
+            &copy; 2025 SILVERSTONE.
+        </div>
+    </footer>
+    
+    <!-- Generic Modal Overlay -->
+    <div id="app-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm" onclick="hideModal()">
+        <div class="bg-white p-8 md:p-12 max-w-lg mx-4 rounded-lg shadow-2xl relative border border-gray-200" onclick="event.stopPropagation()">
+            <button class="absolute top-2 right-4 text-3xl font-light text-gray-700 hover:text-black" onclick="hideModal()">&times;</button>
+            <h3 class="text-xl font-bold font-cinzel mb-4 text-black" id="modal-title">Notification</h3>
+            <div class="text-sm text-gray-700" id="modal-content">Content goes here.</div>
+            <div id="modal-actions" class="mt-6 flex justify-end space-x-4">
+                <button onclick="hideModal()" class="px-6 py-2 text-sm font-bold uppercase tracking-widest border border-black text-black hover:bg-black hover:text-white transition duration-300">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript for Interactivity and View Switching -->
+    <script>
+        // Global view state
+        window.currentView = 'home';
+        
+        // Gemini API configuration
+        const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=`;
+        const API_KEY = ""; // Canvas provides this dynamically
+
+        // DOM element references
+        let heroSection, crossDivider, quoteBanner, artifactsTitle, artifactsGrid, mobileMenu, menuToggle;
+        
+        function renderProductCard(product) {
+            // Use the Firestore document ID for unique tracking
+            const productId = product.id; 
+            const productName = product.name.replace(/"/g, '&quot;');
+            
+            return `
+                <div class="group cursor-pointer product-card" 
+                     data-product-id="${productId}" 
+                     data-product-name="${productName}"
+                     data-product-price="${product.price}"
+                     data-product-description="${product.description}">
+                    <div class="aspect-square bg-gray-100 mb-4 overflow-hidden border border-gray-200">
+                        <img src="${product.img}" alt="${product.name}" 
+                             class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                    </div>
+                    <p class="text-xs uppercase font-medium tracking-wider text-black break-words">${product.name}</p>
+                    <p class="text-xs text-gray-600">${product.price}</p>
+                </div>
+            `;
+        }
+
+        function updateArtifactsGrid(products) {
+            // Show loading indicator if products array is empty
+            if (products.length === 0) {
+                 artifactsGrid.innerHTML = `
+                    <div class="col-span-2 lg:col-span-4 text-center text-gray-600 italic py-10">
+                        No artifacts found in this category. Forging new relics...
+                    </div>
+                `;
+            } else {
+                artifactsGrid.innerHTML = products.map(renderProductCard).join('');
+                attachProductCardListeners(); // Re-attach listeners after content update
+            }
+        }
+
+        // --- View Switching Logic (Dynamic filtering) ---
+        window.changeView = function(view, event) {
+            if (event) event.preventDefault();
+            window.currentView = view;
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            // Hide main home elements by default
+            heroSection.classList.add('hidden');
+            crossDivider.classList.add('hidden');
+            quoteBanner.classList.add('hidden');
+
+            let productsToDisplay = [];
+
+            if (view === 'home') {
+                artifactsTitle.textContent = 'Signature Artifacts';
+                // Filter based on the isFeatured property stored in Firestore
+                productsToDisplay = window.allProducts.filter(p => p.isFeatured === true);
+                
+                heroSection.classList.remove('hidden');
+                crossDivider.classList.remove('hidden');
+                quoteBanner.classList.remove('hidden');
+                
+            } else if (view === 'jewelry') {
+                artifactsTitle.textContent = 'The Jewelry Archive';
+                productsToDisplay = window.allProducts.filter(p => p.category === 'jewelry');
+                
+            } else if (view === 'apparel') {
+                artifactsTitle.textContent = 'Forged Apparel & Leather';
+                productsToDisplay = window.allProducts.filter(p => p.category === 'apparel');
+            }
+
+            updateArtifactsGrid(productsToDisplay);
+        }
+        
+        // --- 1. Mobile Menu Logic ---
+        function openMenu() {
+            mobileMenu.classList.remove('translate-x-full');
+            document.body.style.overflow = 'hidden';
+        }
+
+        window.closeMenu = function() {
+            mobileMenu.classList.add('translate-x-full');
+            document.body.style.overflow = '';
+        }
+
+        // --- 2. Generic Modal Logic ---
+        const appModal = document.getElementById('app-modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalContent = document.getElementById('modal-content');
+        const modalActions = document.getElementById('modal-actions');
+
+        window.showModal = function(content, title = "SILVERSTONE Notification", event) {
+            if (event) event.preventDefault();
+            
+            modalTitle.textContent = title;
+            modalContent.innerHTML = content;
+            modalActions.innerHTML = '<button onclick="hideModal()" class="px-6 py-2 text-sm font-bold uppercase tracking-widest border border-black text-black hover:bg-black hover:text-white transition duration-300">Close</button>';
+            
+            appModal.classList.remove('hidden');
+            appModal.classList.add('flex');
+            document.body.style.overflow = 'hidden';
+        }
+
+        window.hideModal = function() {
+            appModal.classList.add('hidden');
+            appModal.classList.remove('flex');
+            document.body.style.overflow = '';
+        }
+
+        // --- 3. Product Card Click Logic (Opens Modal with detail) ---
+        function handleProductClick() {
+            const name = this.getAttribute('data-product-name');
+            const price = this.getAttribute('data-product-price');
+            const description = this.getAttribute('data-product-description');
+            
+            const content = `
+                <p class="text-base font-cinzel font-bold mb-2">${name}</p>
+                <p class="text-lg text-black font-extrabold mb-4">${price}</p>
+                <p class="text-sm text-gray-600 mb-6">${description}</p>
+                
+                <div class="mb-6">
+                    <button id="generate-summary-btn" data-product-name="${name}" class="text-xs uppercase font-medium text-gray-500 hover:text-black transition duration-200 underline">
+                        Generate Dynamic Summary
+                    </button>
+                    <p id="dynamic-summary" class="mt-2 text-xs italic text-gray-700 hidden">
+                        <!-- Summary will be inserted here -->
+                    </p>
+                    <div id="summary-loading" class="hidden text-xs text-gray-500 mt-2">
+                        <span class="animate-pulse">Forging dynamic description...</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-4">
+                    <input type="number" min="1" value="1" class="w-16 p-2 border border-gray-300 text-center" />
+                    <button class="flex-grow py-3 text-sm font-bold uppercase tracking-widest bg-black text-white hover:bg-gray-800 transition duration-300">
+                        Add to Cart
+                    </button>
+                </div>
+            `;
+            modalTitle.textContent = "Product Detail";
+            showModal(content, "Product Detail");
+            
+            // Add listener for the new dynamic button
+            document.getElementById('generate-summary-btn').addEventListener('click', generateDynamicSummary);
+        }
+
+        function attachProductCardListeners() {
+            const productCards = document.querySelectorAll('.product-card');
+            productCards.forEach(card => {
+                card.removeEventListener('click', handleProductClick);
+                card.addEventListener('click', handleProductClick);
+            });
+        }
+        
+        // --- 4. Dynamic Content Generation using Gemini API ---
+        async function generateDynamicSummary(event) {
+            event.preventDefault();
+            const productName = event.target.getAttribute('data-product-name');
+            const loadingIndicator = document.getElementById('summary-loading');
+            const summaryElement = document.getElementById('dynamic-summary');
+            
+            loadingIndicator.classList.remove('hidden');
+            summaryElement.classList.add('hidden');
+
+            const systemPrompt = "You are a luxury e-commerce copywriter for a high-end gothic jewelry and apparel brand called SILVERSTONE. Provide a brief, one-sentence, powerful, and mysterious description for the following product.";
+            const userQuery = `Write a one-sentence description for the product: ${productName}.`;
+
+            const payload = {
+                contents: [{ parts: [{ text: userQuery }] }],
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+            };
+
+            // Simple exponential backoff retry mechanism
+            const maxRetries = 3;
+            for (let i = 0; i < maxRetries; i++) {
+                try {
+                    const response = await fetch(GEMINI_API_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const result = await response.json();
+                    const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
+
+                    if (text) {
+                        summaryElement.textContent = text.trim();
+                        summaryElement.classList.remove('hidden');
+                        loadingIndicator.classList.add('hidden');
+                        return; // Success
+                    } else {
+                        throw new Error("API returned no text content.");
+                    }
+
+                } catch (error) {
+                    console.error(`Attempt ${i + 1} failed:`, error);
+                    if (i === maxRetries - 1) {
+                        summaryElement.textContent = "Could not forge a description at this time. The internet spirits are restless.";
+                        summaryElement.classList.remove('hidden');
+                        loadingIndicator.classList.add('hidden');
+                    } else {
+                        const delay = Math.pow(2, i) * 1000; // 1s, 2s, 4s
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                    }
+                }
+            }
+        }
+
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize DOM references
+            heroSection = document.getElementById('hero-section');
+            crossDivider = document.getElementById('cross-divider');
+            quoteBanner = document.getElementById('quote-banner');
+            artifactsTitle = document.getElementById('artifacts-title');
+            artifactsGrid = document.getElementById('artifacts-grid');
+            mobileMenu = document.getElementById('mobile-menu');
+            menuToggle = document.getElementById('menu-toggle');
+
+            // Attach listeners for mobile menu toggle
+            if (menuToggle) menuToggle.addEventListener('click', openMenu);
+
+            // --- 5. Newsletter Form Submission Logic ---
+            const newsletterForm = document.getElementById('newsletter-form');
+            const newsletterEmail = document.getElementById('newsletter-email');
+
+            newsletterForm.addEventListener('submit', function(event) {
+                event.preventDefault();
+                const email = newsletterEmail.value;
+                if (email) {
+                    showModal(`Thank you! You are now subscribed to the Vault with email: <br><strong class="font-bold">${email}</strong>`);
+                    newsletterEmail.value = '';
+                } else {
+                    showModal(`Please enter a valid email address to subscribe.`);
+                }
+            });
+            
+            // --- 6. Smooth Scrolling for Anchor Links ---
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    if (this.getAttribute('href') !== '#') {
+                        e.preventDefault();
+                        document.querySelector(this.getAttribute('href')).scrollIntoView({
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+
+            // Note: Initial view load is handled by the Firestore listener once data is ready.
+        });
+    </script>
+
+</body>
+</html>
+
+Initial commit of dynamic storefront code

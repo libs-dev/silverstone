@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Silverstone: Bespoke Streetwear & Atelier</title>
-    <!-- Load Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Tailwind CSS --><script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* Custom styles for the sleek, minimalist, high-end aesthetic */
         body {
@@ -47,6 +46,29 @@
             border: 1px solid #a38c5b; 
         }
         
+        /* Brand Header Card Styling */
+        .brand-header-card {
+            background-color: #1f2937; /* Dark background for high contrast */
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .brand-header-card:hover {
+            opacity: 0.9;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Product Grid Container Transition */
+        .product-grid-container {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out, padding 0.5s ease-in-out;
+        }
+        .product-grid-container.active {
+            max-height: 2000px; /* Large enough value to contain all products */
+            padding-top: 3rem;
+            padding-bottom: 3rem;
+        }
+
         /* Navigation Bar - White and Black/Gold */
         .navbar-bg {
             background-color: rgba(255, 255, 255, 0.95);
@@ -57,48 +79,49 @@
         .nav-link:hover {
             color: #a38c5b; /* Gold on hover */
         }
+        
+        /* Modal Styles */
+        .modal-overlay {
+            background-color: rgba(0, 0, 0, 0.6);
+            transition: opacity 0.3s ease;
+        }
     </style>
 </head>
 <body class="antialiased">
 
-    <!-- Navigation Bar -->
-    <header class="sticky top-0 z-50 navbar-bg backdrop-blur-sm shadow-sm border-b border-gray-100">
+    <!-- Navigation Bar --><header class="sticky top-0 z-50 navbar-bg backdrop-blur-sm shadow-sm border-b border-gray-100">
         <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-            <!-- Logo/Brand Name -->
-            <div class="text-3xl font-extrabold tracking-tight text-[#1f2937] flex items-center">
+            <!-- Logo/Brand Name --><div class="text-3xl font-extrabold tracking-tight text-[#1f2937] flex items-center">
                 <span class="text-silverstone-gold text-4xl mr-1 font-serif">S</span>ilverstone
             </div>
             
-            <!-- Desktop Navigation Links -->
-            <div class="hidden md:flex space-x-10">
+            <!-- Desktop Navigation Links --><div class="hidden md:flex space-x-10">
                 <a href="#home" class="text-sm font-medium nav-link hover:text-silverstone-gold transition duration-150 tracking-wider">HOME</a>
+                <a href="#featured-products" class="text-sm font-medium nav-link hover:text-silverstone-gold transition duration-150 tracking-wider">SHOP ALL</a>
                 <a href="#collections" class="text-sm font-medium nav-link hover:text-silverstone-gold transition duration-150 tracking-wider">COLLECTIONS</a>
                 <a href="#craftsmanship" class="text-sm font-medium nav-link hover:text-silverstone-gold transition duration-150 tracking-wider">CRAFT</a>
                 <a href="#atelier" class="text-sm font-medium nav-link hover:text-silverstone-gold transition duration-150 tracking-wider">ATELIER</a>
             </div>
 
-            <!-- Call to Action Button & Cart Icon -->
-            <div class="flex items-center space-x-4">
+            <!-- Call to Action Button & Cart Icon --><div class="flex items-center space-x-4">
                  <button class="text-[#1f2937] hover:text-silverstone-gold transition duration-150">
-                    <!-- Shopping Cart Icon (Minimalist) -->
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                    <!-- Shopping Cart Icon (Minimalist) --><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
                 </button>
                 <button class="px-6 py-2 rounded-full bg-silverstone-gold text-white font-semibold text-sm btn-primary hidden md:block">
                     Shop The Drop
                 </button>
             </div>
             
-            <!-- Mobile Menu Button (Hamburger) -->
-            <button id="mobile-menu-button" class="md:hidden text-[#1f2937] p-2 rounded-md hover:text-silverstone-gold">
+            <!-- Mobile Menu Button (Hamburger) --><button id="mobile-menu-button" class="md:hidden text-[#1f2937] p-2 rounded-md hover:text-silverstone-gold">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
             </button>
         </nav>
     </header>
 
-    <!-- Mobile Menu (Hidden by default) -->
-    <div id="mobile-menu" class="hidden md:hidden absolute w-full bg-[#fcfcfc] z-40 shadow-lg pb-4 border-b border-gray-100">
+    <!-- Mobile Menu (Hidden by default) --><div id="mobile-menu" class="hidden md:hidden absolute w-full bg-[#fcfcfc] z-40 shadow-lg pb-4 border-b border-gray-100">
         <div class="flex flex-col space-y-3 px-6 py-2">
             <a href="#home" class="py-2 text-[#1f2937] hover:text-silverstone-gold transition duration-150 font-medium">HOME</a>
+            <a href="#featured-products" class="py-2 text-[#1f2937] hover:text-silverstone-gold transition duration-150 font-medium">SHOP ALL</a>
             <a href="#collections" class="py-2 text-[#1f2937] hover:text-silverstone-gold transition duration-150 font-medium">COLLECTIONS</a>
             <a href="#craftsmanship" class="py-2 text-[#1f2937] hover:text-silverstone-gold transition duration-150 font-medium">CRAFT</a>
             <a href="#atelier" class="py-2 text-[#1f2937] hover:text-silverstone-gold transition duration-150 font-medium">ATELIER</a>
@@ -110,8 +133,7 @@
 
 
     <main>
-        <!-- Hero Section -->
-        <section id="home" class="relative overflow-hidden pt-24 md:pt-32 pb-24 md:pb-40 bg-[#fefefe]">
+        <!-- Hero Section (HOME) --><section id="home" class="relative overflow-hidden pt-24 md:pt-32 pb-24 md:pb-40 bg-[#fefefe]">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                 <div class="lg:w-4/5 xl:w-3/5">
                     <h1 class="text-5xl sm:text-7xl lg:text-8xl font-thin leading-tight tracking-tighter mb-8 text-[#1f2937]">
@@ -121,170 +143,52 @@
                         The intersection of refined tailoring and urban utility. Experience the new collection.
                     </p>
                     <div class="flex space-x-4">
-                        <a href="#collections" class="px-10 py-3 rounded-full bg-silverstone-gold text-white font-bold text-lg btn-primary shadow-lg uppercase tracking-wider">
-                            Explore New
+                        <a href="#featured-products" class="px-10 py-3 rounded-full bg-silverstone-gold text-white font-bold text-lg btn-primary shadow-lg uppercase tracking-wider">
+                            Shop All Items
                         </a>
-                        <button class="px-10 py-3 rounded-full bg-transparent border-2 border-[#1f2937]/30 text-[#1f2937] font-bold text-lg hover:bg-gray-100 transition duration-300 uppercase tracking-wider">
-                            The Lookbook
-                        </button>
+                        <a href="#collections" class="px-10 py-3 rounded-full bg-transparent border-2 border-[#1f2937]/30 text-[#1f2937] font-bold text-lg hover:bg-gray-100 transition duration-300 uppercase tracking-wider">
+                            By Atelier
+                        </a>
                     </div>
                 </div>
             </div>
-            <!-- Large Image Placeholder for visual impact -->
-            <div class="hidden lg:block absolute right-0 top-0 h-full w-2/5">
+            <!-- Large Image Placeholder for visual impact --><div class="hidden lg:block absolute right-0 top-0 h-full w-2/5">
                  <img src="https://placehold.co/800x1200/f0f0f0/a38c5b?text=Minimalist+Streetwear+Model" 
                      alt="Minimalist Fashion Model" 
                      class="w-full h-full object-cover opacity-80"
                      onerror="this.onerror=null; this.src='https://placehold.co/800x1200/f0f0f0/a38c5b?text=Sleek+Design';">
             </div>
         </section>
-
-        <!-- Collections Section -->
-        <section id="collections" class="py-20 md:py-32 bg-[#ffffff]">
+        
+        <!-- Featured Products Section (SHOP ALL ITEMS DISPLAY for Home Page) -->
+        <section id="featured-products" class="py-20 md:py-32 bg-[#fcfcfc]">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="text-center mb-16">
-                    <h2 class="text-4xl sm:text-5xl font-light text-[#1f2937] mb-3 uppercase tracking-widest">The Latest Drop</h2>
-                    <p class="text-lg text-gray-500">Curated pieces. Exceptional materials. Limited quantities.</p>
+                <div class="text-center mb-12">
+                    <h2 class="text-4xl sm:text-5xl font-light text-[#1f2937] mb-3 uppercase tracking-widest">Shop All Items</h2>
+                    <p class="text-lg text-gray-500">Every piece from the latest collection, available now.</p>
                 </div>
-
-                <!-- Products Grid -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
-                    
-                    <!-- Product Card 1: Apex Oversized Hoodie -->
-                    <div class="product-card card-bg rounded-lg overflow-hidden shadow-lg">
-                        <div class="relative h-80 w-full bg-gray-100 overflow-hidden">
-                            <img src="https://placehold.co/600x400/eeeeee/a38c5b?text=Apex+Oversized+Hoodie" 
-                                 alt="Apex Oversized Hoodie" 
-                                 class="w-full h-full object-cover transition duration-500 ease-in-out hover:scale-105"
-                                 onerror="this.onerror=null; this.src='https://placehold.co/600x400/eeeeee/a38c5b?text=Oversized+Hoodie';">
-                            <span class="absolute top-4 right-4 bg-silverstone-gold text-white text-xs font-bold px-3 py-1 rounded-full uppercase">Exclusive</span>
-                        </div>
-                        <div class="p-6">
-                            <h3 class="text-xl font-semibold mb-1 text-[#1f2937]">The Apex Hoodie</h3>
-                            <p class="text-gray-500 mb-4 text-sm">Heavyweight cotton, architectural fit.</p>
-                            <div class="flex justify-between items-center">
-                                <span class="text-2xl font-bold text-silverstone-gold">$499</span>
-                                <button class="px-4 py-2 rounded-full bg-silverstone-gold text-white font-semibold text-sm btn-primary uppercase">
-                                    Pre-Order
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Product Card 2: Modular Cargo Pants -->
-                    <div class="product-card card-bg rounded-lg overflow-hidden shadow-lg">
-                        <div class="relative h-80 w-full bg-gray-100 overflow-hidden">
-                            <img src="https://placehold.co/600x400/eeeeee/a38c5b?text=Modular+Cargo+Pants" 
-                                 alt="Modular Cargo Pants" 
-                                 class="w-full h-full object-cover transition duration-500 ease-in-out hover:scale-105"
-                                 onerror="this.onerror=null; this.src='https://placehold.co/600x400/eeeeee/a38c5b?text=Technical+Pants';">
-                            <span class="absolute top-4 left-4 bg-[#1f2937] text-white text-xs font-bold px-3 py-1 rounded-full uppercase">New Tech</span>
-                        </div>
-                        <div class="p-6">
-                            <h3 class="text-xl font-semibold mb-1 text-[#1f2937]">Modular Tech-Twill</h3>
-                            <p class="text-gray-500 mb-4 text-sm">Water-repellent, adaptable utility.</p>
-                            <div class="flex justify-between items-center">
-                                <span class="text-2xl font-bold text-silverstone-gold">$675</span>
-                                <button class="px-4 py-2 rounded-full bg-silverstone-gold text-white font-semibold text-sm btn-primary uppercase">
-                                    Add to Cart
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Product Card 3: Sculpted Trainer -->
-                    <div class="product-card card-bg rounded-lg overflow-hidden shadow-lg">
-                        <div class="relative h-80 w-full bg-gray-100 overflow-hidden">
-                            <img src="https://placehold.co/600x400/eeeeee/a38c5b?text=Sculpted+Trainer" 
-                                 alt="Sculpted Trainer Footwear" 
-                                 class="w-full h-full object-cover transition duration-500 ease-in-out hover:scale-105"
-                                 onerror="this.onerror=null; this.src='https://placehold.co/600x400/eeeeee/a38c5b?text=Exclusive+Footwear';">
-                        </div>
-                        <div class="p-6">
-                            <h3 class="text-xl font-semibold mb-1 text-[#1f2937]">The Zero-G Trainer</h3>
-                            <p class="text-gray-500 mb-4 text-sm">Hand-stitched leather, geometric sole.</p>
-                            <div class="flex justify-between items-center">
-                                <span class="text-2xl font-bold text-silverstone-gold">$950</span>
-                                <button class="px-4 py-2 rounded-full bg-silverstone-gold text-white font-semibold text-sm btn-primary uppercase">
-                                    Buy Now
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Product Card 4: War Memorial Sweatpants (New Product with direct URL) -->
-                    <div class="product-card card-bg rounded-lg overflow-hidden shadow-lg">
-                        <div class="relative h-80 w-full bg-gray-100 overflow-hidden">
-                            <img src="https://img.sanishtech.com/u/cb79ad19cba53904381ba3f6593a5922.jpg" 
-                                 alt="War Memorial Sweatpants" 
-                                 class="w-full h-full object-cover transition duration-500 ease-in-out hover:scale-105"
-                                 onerror="this.onerror=null; this.src='https://placehold.co/600x400/cccccc/1f2937?text=Graphic+Sweatpants';"
-                            >
-                            <span class="absolute top-4 right-4 bg-silverstone-gold text-white text-xs font-bold px-3 py-1 rounded-full uppercase">New Drop</span>
-                        </div>
-                        <div class="p-6">
-                            <h3 class="text-xl font-semibold mb-1 text-[#1f2937]">War Memorial Sweatpants</h3>
-                            <p class="text-gray-500 mb-4 text-sm">Oversized fit, heavy graphic print, structured fleece.</p>
-                            <div class="flex justify-between items-center">
-                                <span class="text-2xl font-bold text-silverstone-gold">$590</span>
-                                <button class="px-4 py-2 rounded-full bg-silverstone-gold text-white font-semibold text-sm btn-primary uppercase">
-                                    Add to Cart
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Product Card 5: Vetements 18+ Restricted Shirt -->
-                    <div class="product-card card-bg rounded-lg overflow-hidden shadow-lg">
-                        <div class="relative h-80 w-full bg-gray-100 overflow-hidden">
-                            <img src="https://img.sanishtech.com/u/c066c8c8d920012d1ca518eaa2a38d1b.png" 
-                                 alt="Vetements 18+ Restricted Shirt" 
-                                 class="w-full h-full object-cover transition duration-500 ease-in-out hover:scale-105"
-                                 onerror="this.onerror=null; this.src='https://placehold.co/600x400/cccccc/1f2937?text=Graphic+Tee';"
-                            >
-                            <span class="absolute top-4 right-4 bg-silverstone-gold text-white text-xs font-bold px-3 py-1 rounded-full uppercase">Bold Graphic</span>
-                        </div>
-                        <div class="p-6">
-                            <h3 class="text-xl font-semibold mb-1 text-[#1f2937]">Vetements Restricted Tee</h3>
-                            <p class="text-gray-500 mb-4 text-sm">Oversized fit, heavy graphic print, structured cotton.</p>
-                            <div class="flex justify-between items-center">
-                                <span class="text-2xl font-bold text-silverstone-gold">$450</span>
-                                <button class="px-4 py-2 rounded-full bg-silverstone-gold text-white font-semibold text-sm btn-primary uppercase">
-                                    Add to Cart
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Product Card 6: Balenciaga Sports Icon Tee (New Product) -->
-                    <div class="product-card card-bg rounded-lg overflow-hidden shadow-lg">
-                        <div class="relative h-80 w-full bg-gray-100 overflow-hidden">
-                            <img src="https://img.sanishtech.com/u/4fd5dc53c5720e09e824e736bd502db5.jpg" 
-                                 alt="Balenciaga Black and Red Sports Icon Shirt" 
-                                 class="w-full h-full object-cover transition duration-500 ease-in-out hover:scale-105"
-                                 onerror="this.onerror=null; this.src='https://placehold.co/600x400/cccccc/1f2937?text=Sports+Icon+Tee';"
-                            >
-                            <span class="absolute top-4 left-4 bg-[#1f2937] text-white text-xs font-bold px-3 py-1 rounded-full uppercase">New Arrival</span>
-                        </div>
-                        <div class="p-6">
-                            <h3 class="text-xl font-semibold mb-1 text-[#1f2937]">Balenciaga Sports Icon Tee</h3>
-                            <p class="text-gray-500 mb-4 text-sm">Oversized fit, embroidered logo detail.</p>
-                            <div class="flex justify-between items-center">
-                                <span class="text-2xl font-bold text-silverstone-gold">$550</span>
-                                <button class="px-4 py-2 rounded-full bg-silverstone-gold text-white font-semibold text-sm btn-primary uppercase">
-                                    Add to Cart
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-
+                <div id="featured-products-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <!-- ALL products will be inserted here by JavaScript -->
                 </div>
             </div>
         </section>
 
-        <!-- Craftsmanship Section (Minimalist Layout) -->
-        <section id="craftsmanship" class="py-20 md:py-32 bg-[#1f2937]">
+
+        <!-- Collections Section (CLICKABLE BLOCKS for Brand Filtering) -->
+        <section id="collections" class="py-20 md:py-32 bg-[#ffffff]">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-16">
+                    <h2 class="text-4xl sm:text-5xl font-light text-[#1f2937] mb-3 uppercase tracking-widest">Curated Ateliers (Brands)</h2>
+                    <p class="text-lg text-gray-500">Select a major brand block to view only its dedicated collection.</p>
+                </div>
+                <!-- Dynamic collection sections will be inserted here by JavaScript -->
+                <div id="product-collections-container" class="space-y-6">
+                    <p class="text-center text-gray-500">Loading collections...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Craftsmanship Section (Minimalist Layout) --><section id="craftsmanship" class="py-20 md:py-32 bg-[#1f2937]">
             <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                 <h2 class="text-4xl sm:text-5xl font-light text-white mb-6 uppercase tracking-widest">
                     Precision in <span class="text-silverstone-gold">Detail</span>
@@ -313,13 +217,11 @@
         </section>
 
 
-        <!-- Footer -->
-        <footer class="bg-[#fcfcfc] py-12 border-t border-gray-100" id="contact">
+        <!-- Footer --><footer class="bg-[#fcfcfc] py-12 border-t border-gray-100" id="contact">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="grid grid-cols-2 md:grid-cols-5 gap-8 border-b border-gray-200 pb-8 mb-8">
                     
-                    <!-- Brand Info -->
-                    <div class="col-span-2 md:col-span-2">
+                    <!-- Brand Info --><div class="col-span-2 md:col-span-2">
                         <div class="text-2xl font-extrabold tracking-tight text-[#1f2937] mb-3 flex items-center">
                             <span class="text-silverstone-gold text-3xl mr-1 font-serif">S</span>ilverstone
                         </div>
@@ -327,26 +229,23 @@
                             The definitive statement in modern luxury streetwear.
                         </p>
                         <div class="flex space-x-4 mt-4">
-                            <!-- Social Icons (Dark/Gold) -->
-                            <a href="#" class="text-[#1f2937]/70 hover:text-silverstone-gold transition"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M14 12v2H7v-2h7zM14 16v-2H7v2h7zM14 8V6H7v2h7zM2 4h18a2 2 0 012 2v12a2 2 0 01-2 2H2a2 2 0 01-2-2V6a2 2 0 012-2zm0 2v12h18V6H2z"/></svg></a>
+                            <!-- Social Icons (Dark/Gold) --><a href="#" class="text-[#1f2937]/70 hover:text-silverstone-gold transition"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M14 12v2H7v-2h7zM14 16v-2H7v2h7zM14 8V6H7v2h7zM2 4h18a2 2 0 012 2v12a2 2 0 01-2 2H2a2 2 0 01-2-2V6a2 2 0 012-2zm0 2v12h18V6H2z"/></svg></a>
                             <a href="#" class="text-[#1f2937]/70 hover:text-silverstone-gold transition"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></a>
                             <a href="#" class="text-[#1f2937]/70 hover:text-silverstone-gold transition"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M10.95 15.05L12 16.1l1.05-1.05-2.1-2.1zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14.5c-2.4 0-4.5 1.5-4.5 3.5 0 2 2.1 3.5 4.5 3.5s4.5-1.5 4.5-3.5c0-2-2.1-3.5-4.5-3.5z"/></svg></a>
                         </div>
                     </div>
                     
-                    <!-- Quick Links -->
-                    <div>
+                    <!-- Quick Links --><div>
                         <h4 class="text-lg font-semibold text-[#1f2937] mb-4 uppercase">Collections</h4>
                         <ul class="space-y-2">
-                            <li><a href="#collections" class="text-sm text-gray-500 hover:text-silverstone-gold transition">Latest Drop</a></li>
-                            <li><a href="#" class="text-sm text-gray-500 hover:text-silverstone-gold transition">Footwear</a></li>
+                            <li><a href="#featured-products" class="text-sm text-gray-500 hover:text-silverstone-gold transition">Shop All Items</a></li>
+                            <li><a href="#collections" class="text-sm text-gray-500 hover:text-silverstone-gold transition">All Ateliers</a></li>
                             <li><a href="#" class="text-sm text-gray-500 hover:text-silverstone-gold transition">Outerwear</a></li>
                             <li><a href="#" class="text-sm text-gray-500 hover:text-silverstone-gold transition">Accessories</a></li>
                         </ul>
                     </div>
 
-                    <!-- Service -->
-                    <div>
+                    <!-- Service --><div>
                         <h4 class="text-lg font-semibold text-[#1f2937] mb-4 uppercase">Service</h4>
                         <ul class="space-y-2">
                             <li><a href="#" class="text-sm text-gray-500 hover:text-silverstone-gold transition">Sizing Guide</a></li>
@@ -356,8 +255,7 @@
                         </ul>
                     </div>
                     
-                    <!-- Contact -->
-                    <div>
+                    <!-- Contact --><div>
                         <h4 class="text-lg font-semibold text-[#1f2937] mb-4 uppercase">Atelier</h4>
                         <p class="text-sm text-gray-500">101 Design Row, Fashion District</p>
                         <p class="text-sm text-gray-500 mt-2">Email: <a href="mailto:info@silverstone.com" class="hover:text-silverstone-gold">info@silverstone.com</a></p>
@@ -373,28 +271,278 @@
 
     </main>
 
+    <!-- JavaScript for Dynamic Rendering and Interactivity -->
     <script>
-        // JavaScript for mobile menu toggle
-        const mobileMenuButton = document.getElementById('mobile-menu-button');
-        const mobileMenu = document.getElementById('mobile-menu');
+        // Data structure for all products, including their brand/collection type
+        const productData = [
+            {
+                id: 'hoodie-bape',
+                name: 'bape zip up', // UPDATED
+                description: 'Iconic full-zip, multi-color variants.',
+                price: 850,
+                brand: 'BAPE',
+                // Placeholder URL (highly reliable, self-contained display)
+                imageUrl: 'https://placehold.co/600x800/222222/a38c5b?text=BAPE+Shark+Hoodie', 
+                tag: 'Limited Edition',
+                tagClass: 'bg-red-600 right-4'
+            },
+            {
+                id: 'pants-memorial',
+                name: 'war memorial sweatpants', // UPDATED
+                description: 'Oversized fit, heavy graphic print, structured fleece.',
+                price: 590,
+                brand: 'Featured Collection',
+                // PERMANENT: Path for your uploaded file (ig pants image.jpg)
+                imageUrl: 'uploaded:ig pants image.jpg-a2349c62-63ec-4321-8a31-5fe926e787ef', 
+                tag: 'New Drop',
+                tagClass: 'bg-silverstone-gold right-4'
+            },
+            {
+                id: 'tee-vetements',
+                name: 'vetements black and red restricted tee', // UPDATED
+                description: 'Oversized fit, heavy graphic print, structured cotton.',
+                price: 450,
+                brand: 'Vetements',
+                // PERMANENT: Path for your uploaded file (vetements restricted shirt.jpg)
+                imageUrl: 'uploaded:vetements restricted shirt.jpg-326da4b0-b85e-4b98-92b2-2aedaf753e85',
+                tag: 'Bold Graphic',
+                tagClass: 'bg-silverstone-gold right-4'
+            },
+            {
+                id: 'tee-balenciaga',
+                name: 'balenciaga black and red sports icon tee', // UPDATED
+                description: 'Oversized fit, embroidered logo detail.',
+                price: 550,
+                brand: 'Balenciaga',
+                // Placeholder URL (highly reliable, self-contained display)
+                imageUrl: 'https://placehold.co/600x800/1f2937/FFFFFF?text=BALENCIAGA+Tee', 
+                tag: 'New Arrival',
+                tagClass: 'bg-[#1f2937] left-4'
+            },
+            {
+                id: 'tee-margiela',
+                name: 'margiella black and white graphic tee', // UPDATED
+                description: 'Signature oversized fit, bold deconstructed graphic.',
+                price: 490,
+                brand: 'Maison Margiela',
+                // Placeholder URL (highly reliable, self-contained display)
+                imageUrl: 'https://placehold.co/600x800/e5e5e5/1f2937?text=MARGIELA+Graphic', 
+                tag: 'Signature Piece',
+                tagClass: 'bg-silverstone-gold right-4'
+            },
+            {
+                id: 'acc-chromehearts',
+                name: 'chrome hears airpod case', // UPDATED
+                description: 'Custom leather finish, sterling silver cross hardware.',
+                price: 899,
+                brand: 'Chrome Hearts',
+                // Placeholder URL (highly reliable, self-contained display)
+                imageUrl: 'https://placehold.co/600x800/374151/FFFFFF?text=CHROME+HEARTS+Case', 
+                tag: "Collector's Item",
+                tagClass: 'bg-[#1f2937] left-4'
+            },
+            {
+                id: 'acc-chromehearts-bracelet',
+                name: 'chrome hearts bracelet', // UPDATED
+                description: 'Hand-crafted sterling silver, iconic cross links.',
+                price: 2500,
+                brand: 'Chrome Hearts',
+                // Placeholder URL (highly reliable, self-contained display)
+                imageUrl: 'https://placehold.co/600x800/000000/a38c5b?text=CHROME+HEARTS+Bracelet', 
+                tag: 'New Arrival',
+                tagClass: 'bg-[#1f2937] left-4'
+            }
+        ];
 
-        mobileMenuButton.addEventListener('click', () => {
-            mobileMenu.classList.toggle('hidden');
-        });
+        // Map for assigning specific colors to brand headers
+        const brandColors = {
+            'Featured Collection': 'bg-silverstone-gold text-[#1f2937]',
+            'Chrome Hearts': 'bg-gray-800 text-white',
+            'Balenciaga': 'bg-[#1f2937] text-white',
+            'BAPE': 'bg-gray-600 text-white',
+            'Maison Margiela': 'bg-gray-400 text-[#1f2937]',
+            'Vetements': 'bg-gray-700 text-white'
+        };
 
-        // Close mobile menu when a link is clicked
-        const mobileLinks = mobileMenu.querySelectorAll('a');
-        mobileLinks.forEach(link => {
-            link.addEventListener('click', () => {
-                mobileMenu.classList.add('hidden');
+
+        // Function to create an HTML card for a single product
+        function createProductCard(product) {
+            const formattedPrice = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0 }).format(product.price);
+            
+            return `
+                <div class="product-card card-bg rounded-lg overflow-hidden shadow-lg">
+                    <div class="relative h-80 w-full bg-gray-100 overflow-hidden">
+                        <img src="${product.imageUrl}" 
+                             alt="${product.name}" 
+                             class="w-full h-full object-cover transition duration-500 ease-in-out hover:scale-105"
+                             onerror="this.onerror=null; this.src='https://placehold.co/600x400/1f2937/a38c5b?text=${product.brand}+${product.name.replace(/ /g, '+')}';"
+                        >
+                        <span class="absolute top-4 ${product.tagClass} text-white text-xs font-bold px-3 py-1 rounded-full uppercase">${product.tag}</span>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="text-xl font-semibold mb-1 text-[#1f2937]">${product.name}</h3>
+                        <p class="text-gray-500 mb-4 text-sm">${product.description}</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-2xl font-bold text-silverstone-gold">${formattedPrice}</span>
+                            <button class="px-4 py-2 rounded-full bg-silverstone-gold text-white font-semibold text-sm btn-primary uppercase" onclick="openProductModal('${product.id}')">
+                                View Details
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Renders ALL products for the homepage's main display
+        function renderFeaturedProducts() {
+            const container = document.getElementById('featured-products-container');
+            // Show ALL products here
+            const featuredItems = productData; 
+
+            if (container) {
+                container.innerHTML = featuredItems.map(createProductCard).join('');
+            }
+        }
+
+        // Renders the clickable, collapsible brand blocks for the collections page
+        function renderCollapsibleCollections() {
+            const container = document.getElementById('product-collections-container');
+            if (!container) return;
+
+            // Define the explicit order of collections
+            const collectionOrder = [
+                'Featured Collection',
+                'Chrome Hearts',
+                'Balenciaga',
+                'BAPE',
+                'Maison Margiela',
+                'Vetements'
+            ];
+
+            // Group products by brand/collection
+            const groupedProducts = productData.reduce((acc, product) => {
+                const brand = product.brand;
+                if (!acc[brand]) {
+                    acc[brand] = [];
+                }
+                acc[brand].push(product);
+                return acc;
+            }, {});
+
+            let htmlContent = '';
+
+            // Iterate through the defined order to build the HTML structure
+            collectionOrder.forEach(brand => {
+                const products = groupedProducts[brand];
+                if (products && products.length > 0) {
+                    const cleanBrandId = brand.toLowerCase().replace(/ /g, '-');
+                    const headerColorClass = brandColors[brand] || 'bg-gray-200 text-[#1f2937]';
+                    const brandTitle = brand.toUpperCase() + (brand.includes('Collection') ? '' : ' ATELIER');
+                    const subtitle = brand === 'Featured Collection' 
+                        ? 'The centerpiece of the latest drop.' 
+                        : 'Explore the definitive, curated selection.';
+
+                    // Generate all product cards for the grid
+                    const productGrid = products.map(createProductCard).join('');
+
+                    htmlContent += `
+                        <div class="collection-block mb-4" id="collection-block-${cleanBrandId}">
+                            <!-- Clickable Brand Header Card -->
+                            <div id="header-${cleanBrandId}" 
+                                 class="brand-header-card ${headerColorClass} rounded-lg shadow-xl p-6 sm:p-8 flex justify-between items-center"
+                                 onclick="toggleCollection('${cleanBrandId}')"
+                            >
+                                <div>
+                                    <h3 class="text-2xl sm:text-4xl font-bold tracking-wider uppercase">${brandTitle}</h3>
+                                    <p class="mt-1 text-sm sm:text-lg opacity-80">${subtitle}</p>
+                                </div>
+                                <div class="arrow-icon transition-transform duration-300">
+                                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                                </div>
+                            </div>
+
+                            <!-- Collapsible Product Grid Container -->
+                            <div id="grid-${cleanBrandId}" class="product-grid-container">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                                    ${productGrid}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
             });
-        });
 
-        // Set current year in footer
-        document.getElementById('current-year').textContent = new Date().getFullYear();
+            container.innerHTML = htmlContent;
+        }
+
+        // Function to toggle the visibility of the collection grid
+        function toggleCollection(brandId) {
+            const grid = document.getElementById(`grid-${brandId}`);
+            const header = document.getElementById(`header-${brandId}`);
+            
+            if (grid && header) {
+                // Toggle the 'active' class for the slide-down effect
+                grid.classList.toggle('active');
+
+                // Toggle the rotation of the arrow icon
+                const arrow = header.querySelector('.arrow-icon svg');
+                if (arrow) {
+                    if (grid.classList.contains('active')) {
+                        arrow.style.transform = 'rotate(90deg)';
+                    } else {
+                        arrow.style.transform = 'rotate(0deg)';
+                    }
+                }
+            }
+        }
+
+        // --- Utility Functions ---
+
+        // Dummy function for the View Details button click (using a temporary modal replacement)
+        function openProductModal(productId) {
+            console.log(`Opening modal for product ID: ${productId}`);
+            
+            // Temporary Alert replacement
+            const tempAlert = document.createElement('div');
+            tempAlert.className = 'fixed inset-0 z-[9999] flex items-center justify-center modal-overlay';
+            tempAlert.innerHTML = `
+                <div class="bg-white p-8 rounded-lg shadow-2xl max-w-sm w-full transform transition-all duration-300 scale-100">
+                    <h3 class="text-xl font-bold mb-4 text-silverstone-gold">Product Action</h3>
+                    <p class="text-gray-700">Action for product ID: <strong>${productId}</strong>. The full product modal functionality is currently pending implementation.</p>
+                    <button class="mt-6 px-4 py-2 rounded-full bg-[#1f2937] text-white font-semibold text-sm btn-primary float-right" onclick="this.closest('.fixed').remove()">Close</button>
+                </div>
+            `;
+            document.body.appendChild(tempAlert);
+        }
+
+        // Function to initialize the app (run on load)
+        function initApp() {
+            // Set current year in footer
+            const yearElement = document.getElementById('current-year');
+            if (yearElement) {
+                yearElement.textContent = new Date().getFullYear();
+            }
+
+            // Mobile menu toggle logic
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            
+            if(mobileMenuButton && mobileMenu) {
+                mobileMenuButton.addEventListener('click', () => {
+                    mobileMenu.classList.toggle('hidden');
+                });
+            }
+
+            // Render ALL products for the homepage's "Shop All Items" section
+            renderFeaturedProducts();
+            
+            // Render the brand-specific, collapsible collection blocks
+            renderCollapsibleCollections();
+        }
+
+        // Run initialization when the DOM is fully loaded
+        document.addEventListener('DOMContentLoaded', initApp);
     </script>
-
 </body>
 </html>
-
 Initial commit of dynamic storefront code

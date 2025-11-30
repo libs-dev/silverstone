@@ -89,7 +89,7 @@
 
         async function initializeFirebase() {
             // Check for valid config object structure, useful for debugging the placeholder
-            if (!firebaseConfig || !firebaseConfig.projectId || firebaseConfig.apiKey === "🚨 PASTE YOUR API KEY HERE 🚨") {
+            if (!firebaseConfig || !firebaseConfig.projectId || firebaseConfig.apiKey === "AIzaSyCZY7NVh5w5LDEc9Jvk-z3UI1TfJTUrzis") {
                 const errorMessage = "FATAL ERROR: Firebase configuration is missing or using placeholder keys. Please update PUBLIC_FIREBASE_CONFIG in the HTML file.";
                 console.error(errorMessage);
                 document.getElementById('user-info').textContent = `ERROR: Firebase Config Missing.`;
@@ -171,8 +171,7 @@
                 console.error("Error listening to products:", error);
             });
         };
-
-        initializeFirebase();
+        // initializeFirebase() is now called in the DOMContentLoaded listener below
     </script>
 
     <!-- Header & Minimal Navigation -->
@@ -361,6 +360,7 @@
         }
 
         function updateArtifactsGrid(products) {
+            const loadingIndicator = document.getElementById('loading-indicator');
             // Show loading indicator if products array is empty
             if (products.length === 0) {
                  artifactsGrid.innerHTML = `
@@ -371,6 +371,9 @@
             } else {
                 artifactsGrid.innerHTML = products.map(renderProductCard).join('');
                 attachProductCardListeners(); // Re-attach listeners after content update
+            }
+            if (loadingIndicator) {
+                loadingIndicator.classList.add('hidden');
             }
         }
 
@@ -587,6 +590,9 @@
                     }
                 });
             });
+
+            // Start Firebase initialization AFTER the DOM is ready
+            initializeFirebase();
 
             // Note: Initial view load is handled by the Firestore listener once data is ready.
         });

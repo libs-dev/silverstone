@@ -43,10 +43,31 @@
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, query, where, getDocs, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Global variables provided by the environment
+        // Global variables provided by the Canvas environment (used when running in Canvas)
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        const firebaseConfigEnv = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        // =======================================================================
+        // --- MANDATORY STEP FOR GITHUB PAGES DEPLOYMENT ---
+        // REPLACE THE PLACEHOLDERS BELOW with your actual public Firebase config 
+        // keys from the Firebase Console Project Settings. 
+        // If these are not updated, the app WILL fail on GitHub Pages.
+        // =======================================================================
+        const PUBLIC_FIREBASE_CONFIG = {
+            apiKey: "AIzaSyCZY7NVh5w5LDEc9Jvk-z3UI1TfJTUrzis", 
+            authDomain: "silverstone-77439.firebaseapp.com", 
+            projectId: "silverstone-77439", 
+            storageBucket: "silverstone-77439.firebasestorage.app", 
+            messagingSenderId: "641973145632", 
+            appId: "1:641973145632:web:51081c0012c174911a2c45", 
+            measurementId: "G-CVCQXBZ5NB" // (Optional)
+        };
+        
+        // Use the environment config if available (i.e., in Canvas), otherwise use the public config.
+        const firebaseConfig = firebaseConfigEnv || PUBLIC_FIREBASE_CONFIG;
+        // =======================================================================
+
 
         let app, db, auth, currentUserId;
         window.allProducts = []; // Global array to hold products fetched from Firestore
@@ -67,8 +88,12 @@
         const PRODUCTS_COLLECTION_PATH = `/artifacts/${appId}/public/data/products`;
 
         async function initializeFirebase() {
-            if (!firebaseConfig) {
-                console.error("Firebase configuration is missing.");
+            // Check for valid config object structure, useful for debugging the placeholder
+            if (!firebaseConfig || !firebaseConfig.projectId || firebaseConfig.apiKey === "🚨 PASTE YOUR API KEY HERE 🚨") {
+                const errorMessage = "FATAL ERROR: Firebase configuration is missing or using placeholder keys. Please update PUBLIC_FIREBASE_CONFIG in the HTML file.";
+                console.error(errorMessage);
+                document.getElementById('user-info').textContent = `ERROR: Firebase Config Missing.`;
+                document.getElementById('user-info').classList.add('text-red-600', 'font-bold');
                 return;
             }
             
